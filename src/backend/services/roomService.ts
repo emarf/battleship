@@ -1,39 +1,48 @@
 import { WebSocket } from "ws";
-import { getWsSendPayload } from "../utils";
+import { broadcastToAllClients, getWsSendPayload } from "../utils";
 import { roomsRepository } from "../repositories/roomsRepository";
 import { WsSendCommands } from "../constants";
 import { usersRepository } from "../repositories/usersRepository";
 import { gameService } from "./gameService";
 
 export const roomService = {
-
-  createRoom: (ws: WebSocket, wsKey: string) => {
+  createRoom: (wsKey: string) => {
     try {
-      const user = usersRepository.getCurrentUser(wsKey);
-
+      const user = usersRepository.getUserByWsKey(wsKey);
+      console.log('user', user);
       roomsRepository.createRoom(user);
-      roomService.updateRoom(ws);
+      roomService.updateRoom();
     } catch (error) {
       console.error(error);
     }
   },
 
-  updateRoom: (ws: WebSocket) => {
-    const rooms = roomsRepository.getRooms();
-    const filteredRooms = rooms.filter(room => room.roomUsers.length < 2);
-    const payload = JSON.stringify(filteredRooms);
+  updateRoom: () => {
+    try {
+      const rooms = roomsRepository.getRooms();
+      const filteredRooms = rooms.filter(room => room.roomUsers.length < 2);
+      const payload = JSON.stringify(filteredRooms);
 
-    ws.send(getWsSendPayload(WsSendCommands.UPDATE_ROOM, payload));
+      broadcastToAllClients(WsSendCommands.UPDATE_ROOM, payload);
+    } catch (error) {
+      console.error(error);
+    }
   },
 
-  addUserToRoom: (ws: WebSocket, wsKey: string, data: string) => {
+  addUserToRoom: (wsKey: string, data: string) => {
     try {
-      const user = usersRepository.getCurrentUser(wsKey);
       const { indexRoom } = JSON.parse(data);
+      const user = usersRepository.getUserByWsKey(wsKey);
+      const room = roomsRepository.getRoom(indexRoom);
 
-      roomsRepository.addUserToRoom(user, indexRoom);
-      roomService.updateRoom(ws);
-      // gameService.createGame(ws, wsKey, room.roomUsers);
+      const isUserInRoom = room.roomUsers.some(({ index }) => index === user.index);
+      if (isUserInRoom) return;
+      room.roomUsers.push({ name: user.name, index: user.index });
+
+      roomsRepository.update(room);
+      roomService.updateRoom();
+
+      gameService.createGame(room);
     } catch (error) {
       console.error(error);
     }

@@ -3,22 +3,25 @@ import { registrationService } from "./services/registrationService";
 import { IncomingMessage } from "http";
 import { WsReceiveCommands } from "./constants";
 import { roomService } from "./services/roomService";
+import { wsKeyToWsClient } from "./storage/websocketClients";
+import { gameService } from "./services/gameService";
 
+export const wsServer = new WebSocketServer({ port: 3000 });
 export const wsServerConnection = () => {
-  const wsServer = new WebSocketServer({ port: 3000 });
-  
-
   wsServer.on("connection", (ws: WebSocket, request: IncomingMessage) => {
-
-    const wsKey = request.headers['sec-websocket-key'];
     console.log("New client connected");
+    const wsKey = request.headers['sec-websocket-key'];
+
+    if (wsKey && !wsKeyToWsClient.has(wsKey)) {
+      wsKeyToWsClient.set(wsKey, ws);
+    }
 
     ws.on("message", (message) => {
       try {
         if (!wsKey) return;
-
         const parsedMessage = JSON.parse(message.toString());
-        console.log('parsedMessage', parsedMessage);
+        console.log('===socket message===', parsedMessage);
+
         const { type, data } = parsedMessage;
         commandsParser(ws, wsKey, type, data);
       } catch (error) {
@@ -28,11 +31,16 @@ export const wsServerConnection = () => {
 
     ws.on("close", () => {
       console.log("Client disconnected");
+
+      if (wsKey) {
+        wsKeyToWsClient.delete(wsKey);
+      }
     });
 
     ws.on("error", (error) => {
       console.error("Error occurred:", error);
     });
+
   });
 };
 
@@ -43,10 +51,14 @@ const commandsParser = (ws: WebSocket, wsKey: string, type: string, data: string
   }
 
   if (type === WsReceiveCommands.CREATE_ROOM) {
-    roomService.createRoom(ws, wsKey);
+    roomService.createRoom(wsKey);
   }
 
   if (type === WsReceiveCommands.ADD_USER_TO_ROOM) {
-    roomService.addUserToRoom(ws, wsKey, data);
+    roomService.addUserToRoom(wsKey, data);
+  }
+
+  if (type === WsReceiveCommands.ADD_SHIPS) {
+    gameService.addShips(wsKey, data);
   }
 };

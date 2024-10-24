@@ -1,8 +1,8 @@
 import { Room } from "../models/roomModel";
 import { User } from "../models/userModal";
+import { randomUUID } from "node:crypto";
 
-const rooms = new Map<number, Room>();
-
+const rooms = new Map<string, Room>();
 
 export const roomsRepository = {
   getRooms: () => {
@@ -10,8 +10,9 @@ export const roomsRepository = {
   },
 
   createRoom: (user: User) => {
+    const uuid = randomUUID();
     const room = {
-      roomId: Date.now(),
+      roomId: uuid,
       roomUsers: [
         {
           name: user.name,
@@ -23,18 +24,21 @@ export const roomsRepository = {
     rooms.set(room.roomId, room);
   },
 
-  addUserToRoom: (user: User, roomId: number): Room => {
+  getRoom: (roomId: string) => {
     const room = rooms.get(roomId);
     if (!room) {
       throw new Error('Room not found');
     }
 
-    room.roomUsers.push({
-      name: user.name,
-      index: user.index
-    });
-
-    rooms.set(roomId, room);
     return room;
+  },
+
+  update: (updatedRoom: Room) => {
+    const room = rooms.get(updatedRoom.roomId);
+    if (!room) {
+      throw new Error('Room not found');
+    }
+
+    rooms.set(updatedRoom.roomId, updatedRoom);
   }
 };

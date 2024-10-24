@@ -1,10 +1,11 @@
 import { User } from "../models/userModal";
+import { randomUUID } from 'crypto';
 
 const users: Map<string, User> = new Map();
 
 export const usersRepository = {
-  checkIsExist: (wsKey: string, password: string): boolean => {
-    const user = users.get(wsKey);
+  checkIsExist: (username: string, password: string): boolean => {
+    const user = users.get(username);
 
     if (!user) {
       return false;
@@ -17,19 +18,32 @@ export const usersRepository = {
     return true;
   },
 
-  registerUser: (wsKey: string, name: string, password: string): User => {
+  register: (name: string, password: string, wsKey: string): User => {
+    const uuid = randomUUID();
     const user = {
       name,
       password,
-      index: Math.floor(Date.now() * Math.random())
+      index: uuid,
+      wsKey: wsKey
     };
-    users.set(wsKey, user);
 
+    users.set(name, user);
     return user;
   },
 
-  getUser: (wsKey: string): User => {
-    const user = users.get(wsKey);
+  login: (name: string, wsKey: string): User => {
+    const user = users.get(name);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // update wsKey if user close and open websocket connection
+    users.set(name, { ...user, wsKey });
+    return user;
+  },
+
+  getUser: (name: string): User => {
+    const user = users.get(name);
     if (!user) {
       throw new Error('User not found');
     }
@@ -37,12 +51,13 @@ export const usersRepository = {
     return user;
   },
 
-  getCurrentUser: (wsKey: string) => {
-    const user = users.get(wsKey);
-    if (!user) {
-      throw new Error('User not found');
+  getUserByWsKey: (wsKey: string) => {
+    for (const user of users.values()) {
+      if (user['wsKey'] === wsKey) {
+        return user;
+      }
     }
 
-    return user;
+    throw new Error('User not found');
   }
 };

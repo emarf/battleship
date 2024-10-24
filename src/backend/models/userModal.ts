@@ -1,5 +1,6 @@
 export type User = {
   name: string;
-  index: number;
+  index: string;
   password: string;
+  wsKey: string;
 };

@@ -1,22 +1,18 @@
-import { User } from "../models/userModal";
+import { randomUUID } from "node:crypto";
+import { Game } from "../models/gameModel";
 
-const games = new Map();
+const games = new Map<string, Game>();
 
 export const gamesRepository = {
-  getGame: (isGame: number) => {
-    const game = games.get(isGame);
-    if (!game) {
-      throw new Error('Game not found');
+  createGame: (playerIds: string[]): Game => {
+    const uuid = randomUUID();
+
+    const game = {
+      idGame: uuid
     }
+
+    games.set(uuid, game);
 
     return game;
-  },
-  createGame: (users: User[]) => {
-    const game = {
-      idGame: Date.now(),
-      playerIds: [users.map(user => user.index)],
-    }
-
-    games.set(game.idGame, game);
   }
 }

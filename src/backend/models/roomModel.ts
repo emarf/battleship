@@ -1,7 +1,7 @@
 export type Room = {
-  roomId: number;
+  roomId: string;
   roomUsers: {
     name: string;
-    index: number;
+    index: string;
   }[]
 }
