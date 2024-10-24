@@ -6,16 +6,23 @@
     "type": "module",
     "scripts": {
         "start": "node ./index.js",
-        "start:dev": "nodemon ./index.js",
+        "start:dev": "tsx --watch ./index.ts",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Andrei Auchynnikau & emarf",
     "keywords": [],
     "license": "ISC",
     "devDependencies": {
-        "nodemon": "^2.0.16"
+        "@types/node": "^22.7.8",
+        "@types/ws": "^8.5.12",
+        "eslint": "^9.13.0",
+        "nodemon": "^3.1.7",
+        "prettier": "^3.3.3",
+        "tsx": "^4.19.1",
+        "webpack": "^5.95.0"
     },
     "dependencies": {
-        "ws": "^8.8.0"
+        "dotenv": "^16.4.5",
+        "ws": "^8.18.0"
     }
 }
