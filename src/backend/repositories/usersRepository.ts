@@ -11,7 +11,7 @@ export const usersRepository = {
       return false;
     }
 
-    if (user?.password !== password) {
+    if (user.password !== password) {
       throw new Error('Wrong password');
     }
 
@@ -20,7 +20,7 @@ export const usersRepository = {
 
   register: (name: string, password: string, wsKey: string): User => {
     const uuid = randomUUID();
-    const user = {
+    const user: User = {
       name,
       password,
       index: uuid,
@@ -37,27 +37,17 @@ export const usersRepository = {
       throw new Error('User not found');
     }
 
-    // update wsKey if user close and open websocket connection
+    // update wsKey if user closes and reopens websocket connection
     users.set(name, { ...user, wsKey });
     return user;
   },
 
-  getUser: (name: string): User => {
-    const user = users.get(name);
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    return user;
-  },
-
-  getUserByWsKey: (wsKey: string) => {
+  getUserByField: (field: keyof User, value: string): User => {
     for (const user of users.values()) {
-      if (user['wsKey'] === wsKey) {
+      if (user[field] === value) {
         return user;
       }
     }
-
     throw new Error('User not found');
   }
 };

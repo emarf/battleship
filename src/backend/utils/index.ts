@@ -1,18 +1,19 @@
 import { wsServer } from "..";
 import { WsSendCommands } from "../constants";
 
-export const getWsSendPayload = (type: WsSendCommands, data: any) => {
-  return JSON.stringify({
+export const getWsServerResponse = (type: WsSendCommands, data: string) => {
+  const payload = JSON.stringify({
     type,
     data,
     id: 0
   });
-}; 
+  return payload;
+};
 
 export const broadcastToAllClients = (type: WsSendCommands, data: string) => {
   wsServer.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(getWsSendPayload(type, data));
+      client.send(getWsServerResponse(type, data));
     }
   });
 }; 

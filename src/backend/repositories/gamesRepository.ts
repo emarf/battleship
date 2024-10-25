@@ -8,11 +8,31 @@ export const gamesRepository = {
     const uuid = randomUUID();
 
     const game = {
-      idGame: uuid
-    }
+      idGame: uuid,
+      playerIds
+    };
 
     games.set(uuid, game);
 
     return game;
+  },
+
+  getGameById: (gameId: string): Game => {
+    const game = games.get(gameId);
+    if (!game) {
+      throw new Error('Game not found');
+    }
+
+    return game;
+  },
+
+  update: (updatedGame: Game) => {
+    const game = games.get(updatedGame.idGame);
+    if (!game) {
+      throw new Error('Game not found');
+    }
+
+    games.set(updatedGame.idGame, updatedGame);
   }
-}
+
+};

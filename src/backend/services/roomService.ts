@@ -1,15 +1,15 @@
 import { WebSocket } from "ws";
-import { broadcastToAllClients, getWsSendPayload } from "../utils";
+import { broadcastToAllClients, getWsServerResponse } from "../utils";
 import { roomsRepository } from "../repositories/roomsRepository";
 import { WsSendCommands } from "../constants";
 import { usersRepository } from "../repositories/usersRepository";
 import { gameService } from "./gameService";
+import { AddUserToRoomClientResponseData } from "../models/response";
 
 export const roomService = {
   createRoom: (wsKey: string) => {
     try {
-      const user = usersRepository.getUserByWsKey(wsKey);
-      console.log('user', user);
+      const user = usersRepository.getUserByField('wsKey', wsKey);
       roomsRepository.createRoom(user);
       roomService.updateRoom();
     } catch (error) {
@@ -21,9 +21,9 @@ export const roomService = {
     try {
       const rooms = roomsRepository.getRooms();
       const filteredRooms = rooms.filter(room => room.roomUsers.length < 2);
-      const payload = JSON.stringify(filteredRooms);
+      const stringifyData = JSON.stringify(filteredRooms);
 
-      broadcastToAllClients(WsSendCommands.UPDATE_ROOM, payload);
+      broadcastToAllClients(WsSendCommands.UPDATE_ROOM, stringifyData);
     } catch (error) {
       console.error(error);
     }
@@ -31,12 +31,13 @@ export const roomService = {
 
   addUserToRoom: (wsKey: string, data: string) => {
     try {
-      const { indexRoom } = JSON.parse(data);
-      const user = usersRepository.getUserByWsKey(wsKey);
+      const { indexRoom }: AddUserToRoomClientResponseData = JSON.parse(data);
+      const user = usersRepository.getUserByField('wsKey', wsKey);
       const room = roomsRepository.getRoom(indexRoom);
 
-      const isUserInRoom = room.roomUsers.some(({ index }) => index === user.index);
-      if (isUserInRoom) return;
+      const isAlreadyInRoom = room.roomUsers.some(({ index }) => index === user.index);
+      if (isAlreadyInRoom) return;
+
       room.roomUsers.push({ name: user.name, index: user.index });
 
       roomsRepository.update(room);
