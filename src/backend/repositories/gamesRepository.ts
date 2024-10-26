@@ -9,7 +9,8 @@ export const gamesRepository = {
 
     const game = {
       idGame: uuid,
-      playerIds
+      playerIds,
+      playerIdToGameSettings: {}
     };
 
     games.set(uuid, game);

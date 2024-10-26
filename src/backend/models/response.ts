@@ -47,3 +47,7 @@ export type AttackServerResponseData = {
   currentPlayer: string;
   status: 'miss' | 'killed' | 'shot';
 };
+
+export type FinishGameServerResponseData = {
+  winPlayer: string;
+}

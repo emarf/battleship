@@ -20,7 +20,7 @@ export const wsServerConnection = () => {
       try {
         if (!wsKey) return;
         const parsedMessage = JSON.parse(message.toString());
-        console.log('===socket message===', parsedMessage);
+        // console.log('===socket message===', parsedMessage);
 
         const { type, data } = parsedMessage;
         commandsParser(ws, wsKey, type, data);
@@ -60,5 +60,9 @@ const commandsParser = (ws: WebSocket, wsKey: string, type: string, data: string
 
   if (type === WsReceiveCommands.ADD_SHIPS) {
     gameService.addShips(wsKey, data);
+  }
+
+  if (type === WsReceiveCommands.ATTACK) {
+    gameService.attack(wsKey, data);
   }
 };
