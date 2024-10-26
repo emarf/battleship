@@ -35,5 +35,4 @@ export const gamesRepository = {
 
     games.set(updatedGame.idGame, updatedGame);
   }
-
 };

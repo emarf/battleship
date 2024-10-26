@@ -1,16 +1,16 @@
 import { WebSocket } from "ws";
 import { usersRepository } from "../repositories/usersRepository";
 import { getWsServerResponse } from "../utils";
-import { roomService } from "./roomService";
+import { roomsService } from "./roomsService";
 import { WsSendCommands } from "../constants";
 import { RegClientResponseData, RegServerResponseData } from "../models/response";
 
 export const registrationService = {
-  registration(ws: WebSocket, wsKey: string, data: string) {
+  registration(ws: WebSocket, data: string) {
     const { name, password }: RegClientResponseData = JSON.parse(data);
     try {
       const hasUser = usersRepository.checkIsExist(name, password);
-      const user = hasUser ? usersRepository.login(name, wsKey) : usersRepository.register(name, password, wsKey);
+      const user = hasUser ? usersRepository.login(name, ws) : usersRepository.register(name, password, ws);
 
       const responseData: RegServerResponseData = {
         name: user.name,
@@ -21,7 +21,7 @@ export const registrationService = {
       const stringifyData = JSON.stringify(responseData);
       ws.send(getWsServerResponse(WsSendCommands.REG, stringifyData));
 
-      roomService.updateRoom();
+      roomsService.updateRoom();
     } catch (error) {
       const responseErrorData: RegServerResponseData = {
         name,

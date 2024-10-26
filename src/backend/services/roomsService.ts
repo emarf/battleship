@@ -1,17 +1,17 @@
 import { WebSocket } from "ws";
-import { broadcastToAllClients, getWsServerResponse } from "../utils";
-import { roomsRepository } from "../repositories/roomsRepository";
 import { WsSendCommands } from "../constants";
-import { usersRepository } from "../repositories/usersRepository";
-import { gameService } from "./gameService";
 import { AddUserToRoomClientResponseData } from "../models/response";
+import { roomsRepository } from "../repositories/roomsRepository";
+import { usersRepository } from "../repositories/usersRepository";
+import { broadcastToAllClients } from "../utils";
+import { gamesService } from "./gamesService";
 
-export const roomService = {
-  createRoom: (wsKey: string) => {
+export const roomsService = {
+  createRoom: (ws: WebSocket) => {
     try {
-      const user = usersRepository.getUserByField('wsKey', wsKey);
+      const user = usersRepository.getUserByField('ws', ws);
       roomsRepository.createRoom(user);
-      roomService.updateRoom();
+      roomsService.updateRoom();
     } catch (error) {
       console.error(error);
     }
@@ -29,10 +29,10 @@ export const roomService = {
     }
   },
 
-  addUserToRoom: (wsKey: string, data: string) => {
+  addUserToRoom: (ws: WebSocket, data: string) => {
     try {
       const { indexRoom }: AddUserToRoomClientResponseData = JSON.parse(data);
-      const user = usersRepository.getUserByField('wsKey', wsKey);
+      const user = usersRepository.getUserByField('ws', ws);
       const room = roomsRepository.getRoom(indexRoom);
 
       const isAlreadyInRoom = room.roomUsers.some(({ index }) => index === user.index);
@@ -41,9 +41,8 @@ export const roomService = {
       room.roomUsers.push({ name: user.name, index: user.index });
 
       roomsRepository.update(room);
-      roomService.updateRoom();
-
-      gameService.createGame(room);
+      roomsService.updateRoom();
+      gamesService.createGame(room);
     } catch (error) {
       console.error(error);
     }

@@ -9,7 +9,7 @@ export const roomsRepository = {
     return Array.from(rooms.values());
   },
 
-  createRoom: (user: User) => {
+  createRoom: (user: User): Room => {
     const uuid = randomUUID();
     const room = {
       roomId: uuid,
@@ -22,6 +22,7 @@ export const roomsRepository = {
     };
 
     rooms.set(room.roomId, room);
+    return room;
   },
 
   getRoom: (roomId: string) => {

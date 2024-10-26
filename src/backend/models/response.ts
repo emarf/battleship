@@ -1,3 +1,4 @@
+import { AttackStatus } from "./gameModel";
 import { Ship } from "./shipModel";
 
 export type RegClientResponseData = {
@@ -45,7 +46,7 @@ export type AttackServerResponseData = {
     y: number;
   };
   currentPlayer: string;
-  status: 'miss' | 'killed' | 'shot';
+  status: AttackStatus;
 };
 
 export type FinishGameServerResponseData = {

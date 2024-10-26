@@ -1,7 +1,6 @@
 import { Ship } from "./shipModel";
 
-
-type GameSettings = {
+export type GameSettings = {
   shipsField: number[][];
   ships: Ship[];
   shipHits: {
@@ -16,3 +15,5 @@ export type Game = {
   playerIds: string[];
   playerIdToGameSettings: Record<string, GameSettings>;
 };
+
+export type AttackStatus = 'shot' | 'killed' | 'miss'
