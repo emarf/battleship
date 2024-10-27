@@ -3,13 +3,10 @@ import { Ship } from "../models/shipModel";
 
 enum CellStatus {
   EMPTY = 0,
-  SHIP = 1
-}
-
-export enum ShotStatus {
-  MISS = 1,
-  SHOT = 2,
-  KILL = 3,
+  SHIP = 1,
+  MISS = 2,
+  SHOT = 3,
+  KILL = 4,
 }
 
 export const generateShipsField = (ships: Ship[]): number[][] => {
@@ -34,16 +31,26 @@ export const generateShipsField = (ships: Ship[]): number[][] => {
 export const updateGameSettings = (gameSettings: GameSettings, targetX: number, targetY: number): {
   updatedGameSettings: GameSettings;
   status: AttackStatus;
+  killedCoordinates?: { x: number; y: number; }[];
+  missedCoordinatesAroundKilled?: { x: number; y: number; }[];
+  isProhibitedShot?: boolean;
 } => {
   const shipsField = gameSettings.shipsField.map((row) => [...row]);
   const shipHits = gameSettings.shipHits.map((hit) => ({ ...hit }));
   const ships = [...gameSettings.ships];
   let sunkShipCount = gameSettings.sunkShipCount;
+
   let status: AttackStatus = 'miss';
+  let killedCoordinates: { x: number; y: number; }[] = [];
+  let missedCoordinatesAroundKilled: { x: number; y: number; }[] = [];
+  const cell = shipsField[targetY][targetX];
 
+  if (cell === CellStatus.MISS || cell === CellStatus.SHOT || cell === CellStatus.KILL) {
+    return { updatedGameSettings: gameSettings, status: cell === CellStatus.MISS ? 'miss' : cell === CellStatus.SHOT ? 'shot' : 'killed', isProhibitedShot: true };
+  }
 
-  if (shipsField[targetY][targetX] === CellStatus.SHIP) {
-    shipsField[targetY][targetX] = ShotStatus.SHOT;
+  if (cell === CellStatus.SHIP) {
+    shipsField[targetY][targetX] = CellStatus.SHOT;
     status = 'shot';
 
     let hitShipIndex = getShipIndex(ships, targetX, targetY);
@@ -52,11 +59,18 @@ export const updateGameSettings = (gameSettings: GameSettings, targetX: number, 
       shipHits[hitShipIndex].hits += 1;
       if (shipHits[hitShipIndex].hits === shipHits[hitShipIndex].length) {
         sunkShipCount += 1;
-        markKilledShip(ships[hitShipIndex], shipsField);
+        const markedCoordinates = markKilledShip(ships[hitShipIndex], shipsField);
+        killedCoordinates = markedCoordinates.filter(coord => shipsField[coord.y][coord.x] === CellStatus.KILL);
+        missedCoordinatesAroundKilled = markedCoordinates.filter(coord => shipsField[coord.y][coord.x] === CellStatus.MISS);
+
         status = 'killed';
       }
     }
+  } else {
+    shipsField[targetY][targetX] = CellStatus.MISS;
   }
+
+  // console.table(shipsField);
 
   return {
     updatedGameSettings: {
@@ -66,29 +80,43 @@ export const updateGameSettings = (gameSettings: GameSettings, targetX: number, 
       sunkShipCount,
     },
     status,
+    killedCoordinates,
+    missedCoordinatesAroundKilled
   };
 };
 
-const markKilledShip = (ship: Ship, field: number[][]) => {
+const markKilledShip = (ship: Ship, field: number[][]): { x: number; y: number; }[] => {
   const { position, direction, length } = ship;
   let { x, y } = position;
+  let markedCoordinates: { x: number; y: number; }[] = [];
 
   for (let i = 0; i < length; i += 1) {
-    field[y][x] = ShotStatus.KILL;
-
-    // for (let dx = -1; dx <= 1; dx++) {
-    //   for (let dy = -1; dy <= 1; dy++) {
-    //     let nx = x + dx;
-    //     let ny = y + dy;
-    //     if (nx >= 0 && nx < FIELD_SIZE && ny >= 0 && ny < FIELD_SIZE && field[ny][nx] === EMPTY) {
-    //       field[ny][nx] = MISS;
-    //     }
-    //   }
-    // }
-
+    markedCoordinates.push({ x, y });
+    field[y][x] = CellStatus.KILL;
     direction ? y += 1 : x += 1;
   }
+
+  let { x: startX, y: startY } = position;
+
+  const endX = direction ? startX + 1 : startX + length;
+  const endY = direction ? startY + length : startY + 1;
+
+  for (let i = startY - 1; i <= endY; i += 1) {
+    for (let j = startX - 1; j <= endX; j += 1) {
+      if (
+        i >= 0 && i < field.length &&
+        j >= 0 && j < field[i].length &&
+        field[i][j] === CellStatus.EMPTY
+      ) {
+        field[i][j] = CellStatus.MISS;
+        markedCoordinates.push({ x: j, y: i });
+      }
+    }
+  }
+
+  return markedCoordinates;
 };
+
 
 const getShipIndex = (ships: Ship[], x: number, y: number) => {
   return ships.findIndex((ship) => {
@@ -104,4 +132,15 @@ const getShipIndex = (ships: Ship[], x: number, y: number) => {
     }
     return false;
   });
+};
+
+export const getFirstEmptyCoordinate = (shipsField: number[][]): { x: number; y: number; } | null => {
+  for (let y = 0; y < shipsField.length; y += 1) {
+    for (let x = 0; x < shipsField[y].length; x += 1) {
+      if (shipsField[y][x] === CellStatus.EMPTY || shipsField[y][x] === CellStatus.SHIP) {
+        return { x, y };
+      }
+    }
+  }
+  return null;
 };

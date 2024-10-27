@@ -33,6 +33,11 @@ export type StartGameServerResponseData = {
   currentPlayerIndex: string;
 };
 
+export type RandomAttackClientResponseData = {
+  gameId: string;
+  indexPlayer: string;
+};
+
 export type AttackClientResponseData = {
   gameId: string;
   x: number;
@@ -51,4 +56,4 @@ export type AttackServerResponseData = {
 
 export type FinishGameServerResponseData = {
   winPlayer: string;
-}
+};

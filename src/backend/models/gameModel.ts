@@ -14,6 +14,7 @@ export type Game = {
   idGame: string,
   playerIds: string[];
   playerIdToGameSettings: Record<string, GameSettings>;
+  currentPlayerId?: string;
 };
 
-export type AttackStatus = 'shot' | 'killed' | 'miss'
+export type AttackStatus = 'shot' | 'killed' | 'miss';

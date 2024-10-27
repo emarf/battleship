@@ -4,6 +4,7 @@ import { getWsServerResponse } from "../utils";
 import { roomsService } from "./roomsService";
 import { WsSendCommands } from "../constants";
 import { RegClientResponseData, RegServerResponseData } from "../models/response";
+import { winnersService } from "./winnersService";
 
 export const registrationService = {
   registration(ws: WebSocket, data: string) {
@@ -22,6 +23,7 @@ export const registrationService = {
       ws.send(getWsServerResponse(WsSendCommands.REG, stringifyData));
 
       roomsService.updateRoom();
+      winnersService.updateWinners();
     } catch (error) {
       const responseErrorData: RegServerResponseData = {
         name,

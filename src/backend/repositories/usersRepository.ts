@@ -11,6 +11,7 @@ const userMaps: Record<keyof User, Map<string | WebSocket, User>> = {
   index: userByIndex,
   password: new Map(),
   ws: userByWs,
+  wins: new Map(),
 };
 
 export const usersRepository = {
@@ -34,7 +35,8 @@ export const usersRepository = {
       name,
       password,
       index: uuid,
-      ws: ws
+      ws: ws,
+      wins: 0
     };
 
     userByName.set(name, user);
@@ -71,5 +73,15 @@ export const usersRepository = {
     }
 
     return user;
+  },
+
+  update: (user: User) => {
+    userByName.set(user.name, user);
+    userByIndex.set(user.index, user);
+    userByWs.set(user.ws, user);
+  },
+
+  getUsers() {
+    return Array.from(userByName.values());
   }
 };

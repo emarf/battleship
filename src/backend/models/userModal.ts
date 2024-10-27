@@ -5,4 +5,5 @@ export type User = {
   index: string;
   password: string;
   ws: WebSocket;
+  wins: number;
 };
