@@ -1,11 +1,6 @@
 import { AttackStatus } from "./gameModel";
 import { Ship } from "./shipModel";
 
-export type RegClientResponseData = {
-  name: string;
-  password: string;
-};
-
 export type RegServerResponseData = {
   name: string;
   index: string;
@@ -13,36 +8,14 @@ export type RegServerResponseData = {
   errorText: string;
 };
 
-export type AddUserToRoomClientResponseData = {
-  indexRoom: string;
-};
-
 export type CreateGameServerResponseData = {
   idGame: string;
   idPlayer: string;
 };
 
-export type AddShipsClientResponseData = {
-  gameId: string;
-  ships: Ship[];
-  indexPlayer: string;
-};
-
 export type StartGameServerResponseData = {
   ships: Ship[];
   currentPlayerIndex: string;
-};
-
-export type RandomAttackClientResponseData = {
-  gameId: string;
-  indexPlayer: string;
-};
-
-export type AttackClientResponseData = {
-  gameId: string;
-  x: number;
-  y: number;
-  indexPlayer: string;
 };
 
 export type AttackServerResponseData = {

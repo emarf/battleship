@@ -24,19 +24,6 @@ export const wsServerConnection = () => {
 
     ws.on("close", () => {
       console.log("Client disconnected");
-      // const stringifyData = JSON.stringify({
-      //   type: 'diconnect',
-      //   data: '',
-      //   id: 0
-      // });
-
-      // wsServer.clients.forEach((client) => {
-      //   if (client.readyState === WebSocket.OPEN) {
-      //     client.send(stringifyData);
-      //   }
-      // });
-
-      // ws.send(stringifyData);
     });
 
     ws.on("error", (error) => {

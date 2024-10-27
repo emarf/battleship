@@ -1,7 +1,8 @@
 import { WsSendCommands } from "../constants";
+import { AddShipsClientResponseData, AttackClientResponseData, RandomAttackClientResponseData } from "../models/clientResponseData";
 import { AttackStatus, Game } from "../models/gameModel";
-import { AddShipsClientResponseData, AttackClientResponseData, AttackServerResponseData, CreateGameServerResponseData, FinishGameServerResponseData, RandomAttackClientResponseData, StartGameServerResponseData } from "../models/response";
 import { Room } from "../models/roomModel";
+import { AttackServerResponseData, CreateGameServerResponseData, FinishGameServerResponseData, StartGameServerResponseData } from "../models/serverResponseData";
 import { gamesRepository } from "../repositories/gamesRepository";
 import { usersRepository } from "../repositories/usersRepository";
 import { getWsServerResponse } from "../utils";
@@ -85,7 +86,6 @@ export const gamesService = {
 
     console.table(shipsField);
     const coordinates = getFirstEmptyCoordinate(shipsField);
-    console.log('coordinates', coordinates);
 
     if (!coordinates) {
       gamesService.finishGame(game, indexPlayer);

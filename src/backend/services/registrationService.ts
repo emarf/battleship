@@ -3,8 +3,9 @@ import { usersRepository } from "../repositories/usersRepository";
 import { getWsServerResponse } from "../utils";
 import { roomsService } from "./roomsService";
 import { WsSendCommands } from "../constants";
-import { RegClientResponseData, RegServerResponseData } from "../models/response";
 import { winnersService } from "./winnersService";
+import { RegClientResponseData } from "../models/clientResponseData";
+import { RegServerResponseData } from "../models/serverResponseData";
 
 export const registrationService = {
   registration(ws: WebSocket, data: string) {

@@ -1,10 +1,10 @@
 import { WebSocket } from "ws";
 import { WsSendCommands } from "../constants";
-import { AddUserToRoomClientResponseData } from "../models/response";
 import { roomsRepository } from "../repositories/roomsRepository";
 import { usersRepository } from "../repositories/usersRepository";
 import { broadcastToAllClients } from "../utils";
 import { gamesService } from "./gamesService";
+import { AddUserToRoomClientResponseData } from "../models/clientResponseData";
 
 export const roomsService = {
   createRoom: (ws: WebSocket) => {
